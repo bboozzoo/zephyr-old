@@ -1,17 +1,17 @@
 
-if [ "X$(basename -- "$0")" == "Xzephyr-env.sh" ]; then
+if [[ -n "$BASH"  && "X$(basename -- "$0")" == "Xzephyr-env.sh" ]]; then
     echo "Source this file (do NOT execute it!) to set the Zephyr Kernel environment."
     exit
 fi
 
 # You can further customize your environment by creating a bash script called
-# zephyr-env_install.bash in your home directory. It will be automatically
+# zephyr-env_install in your home directory. It will be automatically
 # run (if it exists) by this script.
 
 uname | grep -q MINGW && MINGW_OPT="-W"
 
 # identify OS source tree root directory
-export ZEPHYR_BASE=$( builtin cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ${MINGW_OPT})
+export ZEPHYR_BASE=$( builtin cd "$( dirname "$0" )" && pwd ${MINGW_OPT})
 
 scripts_path=${ZEPHYR_BASE}/scripts
 echo "${PATH}" | grep -q "${scripts_path}"
@@ -19,9 +19,9 @@ echo "${PATH}" | grep -q "${scripts_path}"
 unset scripts_path
 
 # enable custom environment settings
-zephyr_answer_file=~/zephyr-env_install.bash
+zephyr_answer_file=~/zephyr-env_install
 [ -f ${zephyr_answer_file} ] && {
-	echo "Warning: Please rename ~/zephyr-env_install.bash to ~/.zephyrrc";
+	echo "Warning: Please rename ~/zephyr-env_install to ~/.zephyrrc";
 	. ${zephyr_answer_file};
 }
 unset zephyr_answer_file

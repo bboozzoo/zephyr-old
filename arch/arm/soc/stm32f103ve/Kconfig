@@ -32,7 +32,7 @@ config SRAM_BASE_ADDRESS
         default 0x20000000
 
 config FLASH_BASE_ADDRESS
-        default 0x0800000
+        default 0x08000000
 
 config NUM_IRQ_PRIO_BITS
         int

@@ -21,6 +21,13 @@
 #ifndef _STM32F103_SOC_H_
 #define _STM32F103_SOC_H_
 
+/* peripherals start address */
+#define PERIPH_BASE           0x40000000
+
+/* use naming consistent with STMF10x Peripherals Library */
+#define APB1PERIPH_BASE        PERIPH_BASE
+#define APB2PERIPH_BASE       (PERIPH_BASE + 0x10000)
+#define AHBPERIPH_BASE        (PERIPH_BASE + 0x20000)
 #ifndef _ASMLANGUAGE
 
 #include <device.h>

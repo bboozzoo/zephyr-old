@@ -17,16 +17,18 @@
 # limitations under the License.
 #
 
-if SOC_STM32F103VE
+choice
+prompt "STM32F103x MCU Selection"
+depends on SOC_STM32F103
+
+source "arch/arm/soc/stm32f103x/Kconfig.soc.stm32f103*"
+
+endchoice
+
+if SOC_STM32F103
 
 config SOC
-       default stm32f103ve
-
-config SRAM_SIZE
-       default 64
-
-config FLASH_SIZE
-       default 512
+       default stm32f103x
 
 config SRAM_BASE_ADDRESS
         default 0x20000000
@@ -38,10 +40,6 @@ config NUM_IRQ_PRIO_BITS
         int
         default 3
 
-config NUM_IRQS
-        int
-        default 68
-
 config KERNEL_INIT_PRIORITY_DEFAULT
         default 40
 
@@ -50,14 +48,6 @@ config KERNEL_INIT_PRIORITY_DEVICE
 
 config UART_CONSOLE_PRIORITY
         default 60
-
-if UART_STM32F103VE
-
-config UART_STM32F103VE_BAUD_RATE
-        int
-        default 115200
-
-endif # UART_STM32F103VE
 
 if UART_CONSOLE
 
@@ -69,5 +59,20 @@ config UART_CONSOLE_IRQ_PRI
         default 3
 
 endif # UART_CONSOLE
+
+endif # SOC_STM32F103
+
+
+if SOC_STM32F103VE
+
+config SRAM_SIZE
+       default 64
+
+config FLASH_SIZE
+       default 512
+
+config NUM_IRQS
+        int
+        default 68
 
 endif # SOC_STM32F103VE

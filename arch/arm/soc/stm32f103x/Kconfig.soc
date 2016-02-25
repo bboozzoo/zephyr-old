@@ -1,5 +1,5 @@
 
-config SOC_STM32F103VE
-	bool "STM32F103VE Processor"
+config SOC_STM32F103
+	bool "STM32F103x MCU Family"
 	select CPU_CORTEX_M
 	select CPU_CORTEX_M3

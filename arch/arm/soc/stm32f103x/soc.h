@@ -28,6 +28,15 @@
 #define APB1PERIPH_BASE        PERIPH_BASE
 #define APB2PERIPH_BASE       (PERIPH_BASE + 0x10000)
 #define AHBPERIPH_BASE        (PERIPH_BASE + 0x20000)
+
+/* UART */
+#define USART1_ADDR           (APB2PERIPH_BASE + 0x3800)
+#define USART2_ADDR           (APB1PERIPH_BASE + 0x4400)
+#define USART3_ADDR           (APB1PERIPH_BASE + 0x4800)
+
+/* Reset and Clock Control */
+#define RCC_BASE              (AHBPERIPH_BASE + 0x1000)
+
 #ifndef _ASMLANGUAGE
 
 #include <device.h>

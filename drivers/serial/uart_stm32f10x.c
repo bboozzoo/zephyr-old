@@ -27,6 +27,7 @@
 #include <uart.h>
 #include <sections.h>
 #include <rcc.h>
+#include <gpio.h>
 
 union __sr {
 	uint32_t val;
@@ -212,10 +213,29 @@ static unsigned char uart_stm32f10x_poll_out(struct device *dev,
 }
 
 /**
+ * @brief setup MCU pins
+ *
+ * FIXME: this should really take a port related parameter
+ */
+static void setup_port(void) {
+	volatile struct stm32f10x_gpio *gpio = (struct stm32f10x_gpio *)(GPIOA_BASE);
+
+	/* pin 9, output, alternate function push-pull */
+	gpio->crh &= ~(0xf << 4);
+	gpio->crh |= (0x2 << 6) | (0x1 << 4);
+
+
+	/* pin 10, input */
+	gpio->crh &= ~(0xf << 8);
+	gpio->crh |= (0x1 << 10);
+}
+
+/**
  * @brief Initialize UART channel
  *
  * This routine is called to reset the chip in a quiescent state.
  * It is assumed that this function is called only once per UART.
+ * NOTE: hardcided to setup USART1 only
  *
  * @param dev UART device struct
  *
@@ -227,10 +247,21 @@ static int uart_stm32f10x_init(struct device *dev)
 
 	/* TODO: find out which UART port we're using */
 
+	/* FIXME: hardcoded USART1 */
+
 	/* enable clock */
 	volatile struct stm32f10x_rcc *rcc = (struct stm32f10x_rcc*)(RCC_BASE);
-	/* FIXME: usart 1 */
-	rcc->apb2enr |= 0x4000;
+	/* USART1, APB2 clock */
+	rcc->apb2enr |= 1 << 14;
+
+	/* GPIO port A, APB2 clock */
+	rcc->apb2enr |= 1 << 2;
+
+	/* AF, APB2 clock */
+	rcc->apb2enr |= 1 << 0;
+
+	/* setup pins */
+	setup_port();
 
 	/* clear stop bits */
 	uart->cr2.bit.stop = 0;
@@ -244,10 +275,25 @@ static int uart_stm32f10x_init(struct device *dev)
 	uart->cr3.bit.ctse = 0;
 	uart->cr3.bit.rtse = 0;
 
-	/* setup 115200 */
+	/* setup 9600 */
 	/* TODO: setup baud rate */
-	/* uart->brr.bit.mantissa = 1; */
-	/* uart->brr.bit.fraction = 0; */
+
+	/* assuming PCLK2 (USART1) is clocked at 36MHz */
+
+	/* baud rate calculation:
+	 *
+	 *     baud rate = f_clk / (16 * usartdiv)
+	 *
+	 * for USART1, f_clk == PCLK2, for 9600, usartdiv = 234.375,
+	 * hence mantissa = 234, fracion = 6 (0.375 * 16)
+	 */
+
+	uart->brr.bit.mantissa = 234;
+	uart->brr.bit.fraction = 6;
+
+	/* enable TX/RX */
+	uart->cr1.bit.te = 1;
+	uart->cr1.bit.re = 1;
 
 	/* enable */
 	uart->cr1.bit.ue = 1;

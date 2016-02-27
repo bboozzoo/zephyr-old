@@ -47,12 +47,6 @@ static int stm32f103ve_init(struct device *arg)
 
 	ARG_UNUSED(arg);
 
-	/* Note:
-	 * Magic numbers below are obtained by reading the registers
-	 * when the SoC was running the SAM-BA bootloader
-	 * (with reserved bits set to 0).
-	 */
-
 	key = irq_lock();
 
 	/* Setup the vector table offset register (VTOR),

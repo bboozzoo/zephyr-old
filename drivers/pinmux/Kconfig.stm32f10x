@@ -1,0 +1,4 @@
+config PINMUX_STM32F10X
+       bool "Pinmux driver for STM32F10x MCUs"
+       depends on PINMUX && SOC_STM32F10X
+

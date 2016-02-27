@@ -19,6 +19,8 @@
 
 config SOC_STM32F10X
        bool
+       select PINMUX
+       select PINMUX_STM32F10X
        select CLOCK_CONTROL
        select CLOCK_CONTROL_STM32F10X
 

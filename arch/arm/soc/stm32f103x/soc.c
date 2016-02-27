@@ -34,19 +34,6 @@ extern void _NmiInit(void);
 #endif
 
 /**
- * @brief Setup various clock on SoC.
- */
-static void clock_init(void)
-{
-	volatile struct stm32f10x_rcc *rcc = (struct stm32f10x_rcc *)(RCC_BASE);
-
-	/* enable HSI clock */
-	rcc->cr.bit.hsion = 1;
-	/* this should end after one test */
-	while (rcc->cr.bit.hsirdy != 1);
-}
-
-/**
  * @brief Perform basic hardware initialization at boot.
  *
  * This needs to be run from the very beginning.
@@ -79,9 +66,6 @@ static int stm32f103ve_init(struct device *arg)
 	_ScbUsageFaultAllFaultsReset();
 
 	_ScbHardFaultAllFaultsReset();
-
-	/* Setup master clock */
-	clock_init();
 
 	/* Install default handler that simply resets the CPU
 	 * if configured in the kernel, NOP otherwise

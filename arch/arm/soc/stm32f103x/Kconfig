@@ -19,6 +19,8 @@
 
 config SOC_STM32F10X
        bool
+       select CLOCK_CONTROL
+       select CLOCK_CONTROL_STM32F10X
 
 choice
 prompt "STM32F103x MCU Selection"

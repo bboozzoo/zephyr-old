@@ -1,0 +1,60 @@
+config CLOCK_CONTROL_STM32F10X
+       bool
+       prompt "STM32F10x Reset & Clock Control"
+       depends on CLOCK_CONTROL && SOC_STM32F10X
+       default y if SOC_STM32F10X
+
+choice
+prompt "STM32F10x System Clock Source"
+depends on CLOCK_CONTROL_STM32F10X
+
+config CLOCK_STM32F10X_SYSCLK_SRC_HSI
+       bool "HSI"
+
+config CLOCK_STM32F10X_SYSCLK_SRC_HSE
+       bool "HSE"
+
+config CLOCK_STM32F10X_SYSCLK_SRC_PLL
+       bool "PLL"
+
+endchoice
+
+choice
+prompt "STM32F10x PLL Clock Source"
+depends on CLOCK_CONTROL_STM32F10X
+
+config CLOCK_STM32F10X_PLL_SRC_HSI
+       bool "HSI"
+
+config CLOCK_STM32F10X_PLL_SRC_PREDIV1
+       bool "PREDIV1"
+
+endchoice
+
+config CLOCK_STM32F10X_PLL_MULTIPLIER
+       int "PLL multiplier"
+       depends on CLOCK_CONTROL_STM32F10X
+       help
+        PLL multiplier, allowed values: 4, 5, 6, 7, 8, 9, and 65.
+        Value 65 maps to 6.5x multiplier.
+
+config CLOCK_STM32F10X_AHB_PRESCALER
+       int "AHB prescaler"
+       depends on CLOCK_CONTROL_STM32F10X
+       help
+        AHB prescaler, allowed values: 0, 2, 4, 7, 16, 64, 128,
+        256, 512.
+
+config CLOCK_STM32F10X_APB1_PRESCALER
+       int "APB1 prescaler"
+       depends on CLOCK_CONTROL_STM32F10X
+       help
+        APB1 Low speed clock (PCLK1) prescaler, allowed values:
+        2, 4, 8, 16
+
+config CLOCK_STM32F10X_APB2_PRESCALER
+       int "APB2 prescaler"
+       depends on CLOCK_CONTROL_STM32F10X
+       help
+        APB2 High speed clock (PCLK2) prescaler, allowed values:
+        2, 4, 8, 16

@@ -85,3 +85,6 @@ config  CLOCK_CONTROL_QUARK_SE_SENSOR_DRV_NAME
        prompt "Quark SE sensor clock device name"
        depends on CLOCK_CONTROL_QUARK_SE_PERIPHERAL
        default "clk_sensor"
+
+source "drivers/clock_control/Kconfig.stm32f10x"
+

@@ -15,20 +15,31 @@
  */
 
 /**
- * @brief Driver for UART on STM32F10x family processor.
+ * @brief Driver for Reset & Clock Control of STM32F10x family processor.
  *
- * (used uart_atmel_sam3.c as template)
+ * Based on reference manual:
+ *   STM32F101xx, STM32F102xx, STM32F103xx, STM32F105xx and STM32F107xx
+ *   advanced ARM ® -based 32-bit MCUs
+ *
+ * Chapter 27: Universal synchronous asynchronous receiver
+ *             transmitter (USART)
  */
+
 #include <nanokernel.h>
 #include <arch/cpu.h>
 #include <misc/__assert.h>
 #include <board.h>
 #include <init.h>
 #include <uart.h>
-#include <sections.h>
-#include <rcc.h>
-#include <gpio.h>
+#include <clock_control.h>
 
+#include <sections.h>
+#include <gpio.h>
+#include <clock_control/stm32f10x_clock_control.h>
+#include <pinmux/pinmux_stm32f10x.h>
+#include <pinmux.h>
+
+/*  27.6.1 Status register (USART_SR) */
 union __sr {
 	uint32_t val;
 	struct {
@@ -47,6 +58,7 @@ union __sr {
 	} bit;
 };
 
+/* 27.6.2 Data register (USART_DR) */
 union __dr {
 	uint32_t val;
 	struct {
@@ -55,6 +67,7 @@ union __dr {
 	} bit;
 };
 
+/* 27.6.3 Baud rate register (USART_BRR) */
 union __brr {
 	uint32_t val;
 	struct {
@@ -64,6 +77,7 @@ union __brr {
 	} bit;
 };
 
+/* 27.6.4 Control register 1 (USART_CR1) */
 union __cr1 {
 	uint32_t val;
 	struct {
@@ -86,6 +100,7 @@ union __cr1 {
 	} bit;
 };
 
+/* 27.6.5 Control register 2 (USART_CR2) */
 union __cr2 {
 	uint32_t val;
 	struct {
@@ -104,6 +119,7 @@ union __cr2 {
 	} bit;
 };
 
+/* 27.6.6 Control register 3 (USART_CR3) */
 union __cr3 {
 	uint32_t val;
 	struct {
@@ -122,6 +138,7 @@ union __cr3 {
 	} bit;
 };
 
+/* 27.6.7 Guard time and prescaler register (USART_GTPR) */
 union __gtpr {
 	uint32_t val;
 	struct {
@@ -131,6 +148,7 @@ union __gtpr {
 	} bit;
 };
 
+/* 27.6.8 USART register map */
 struct __uart {
 	union __sr sr;
 	union __dr dr;
@@ -141,17 +159,24 @@ struct __uart {
 	union __gtpr gtpr;
 };
 
-struct uart_stm32f10x_dev_data {
+struct uart_stm32f10x_config {
+	struct uart_device_config uconf;
 	uint32_t baud_rate;
+	clock_control_subsys_t clock_subsys;
+
+};
+
+struct uart_stm32f10x_data {
+	struct device *clock;
 };
 
 /* convenience defines */
-#define DEV_CFG(dev) \
-	((struct uart_device_config * const)(dev)->config->config_info)
-#define DEV_DATA(dev) \
-	((struct uart_stm32f10x_data_t * const)(dev)->driver_data)
-#define UART_STRUCT(dev) \
-	((volatile struct __uart *)(DEV_CFG(dev))->base)
+#define DEV_CFG(dev)							\
+	((struct uart_stm32f10x_config * const)(dev)->config->config_info)
+#define DEV_DATA(dev)							\
+	((struct uart_stm32f10x_data * const)(dev)->driver_data)
+#define UART_STRUCT(dev)					\
+	((volatile struct __uart *)(DEV_CFG(dev))->uconf.base)
 
 static struct uart_driver_api uart_stm32f10x_driver_api;
 
@@ -162,8 +187,37 @@ static struct uart_driver_api uart_stm32f10x_driver_api;
 static void set_baud_rate(struct device *dev, uint32_t rate)
 {
 	volatile struct __uart *uart = UART_STRUCT(dev);
+	struct uart_stm32f10x_data *data = DEV_DATA(dev);
+	struct uart_stm32f10x_config *cfg = DEV_CFG(dev);
 
-	/* get clock frequency */
+	/* Baud rate is controlled through BRR register. The values
+	 * written into the register depend on the clock driving the
+	 * peripheral, this can be either PCLK1 or PCLK2. Ask
+	 * clock_control for the current clock rate of our
+	 * peripheral. */
+	uint32_t clock;
+	stm32f10x_clock_control_get_subsys_rate(data->clock,
+						cfg->clock_subsys,
+						&clock);
+
+	/* baud rate calculation:
+	 *
+	 *     baud rate = f_clk / (16 * usartdiv)
+	 *
+	 * Example (USART1, PCLK2 @ 36MHz, 9600bps):
+	 *
+	 *    f_clk == PCLK2,
+	 *    usartdiv = 234.375,
+	 *    mantissa = 234,
+	 *    fracion = 6 (0.375 * 16)
+	 */
+
+	uint32_t div = clock / rate;
+	uint32_t mantissa = div >> 4;
+	uint32_t fraction = div & 0xf;
+
+	uart->brr.bit.mantissa = mantissa;
+	uart->brr.bit.fraction = fraction;
 }
 
 /**
@@ -217,19 +271,33 @@ static unsigned char uart_stm32f10x_poll_out(struct device *dev,
  *
  * FIXME: this should really take a port related parameter
  */
-static void setup_port(void) {
-	volatile struct stm32f10x_gpio *gpio = (struct stm32f10x_gpio *)(GPIOA_BASE);
+static void setup_port(struct uart_stm32f10x_data *data) {
+	struct device *pindev = device_get_binding(PINMUX_NAME);
 
-	/* pin 9, output, alternate function push-pull */
-	gpio->crh &= ~(0xf << 4);
-	gpio->crh |= (0x2 << 6) | (0x1 << 4);
+	pinmux_pin_set(pindev, STM32PIN(STM32_PORTA, 9),
+		PIN_CONFIG_AF_PUSH_PULL);
 
+	pinmux_pin_set(pindev, STM32PIN(STM32_PORTA, 10),
+		PIN_CONFIG_BIAS_HIGH_IMPEDANCE);
 
-	/* pin 10, input */
-	gpio->crh &= ~(0xf << 8);
-	gpio->crh |= (0x1 << 10);
+#if 0
+	/* FIXME: find out if we really need to enable AFIO clock,
+	 * even if no remapping is done */
+	/* AF, APB2 clock */
+	rcc->apb2enr |= 1 << 0;
+#endif
 }
 
+static inline void __uart_stm32f10x_get_clock(struct device *dev)
+{
+	struct device *clk =
+		device_get_binding(STM32F10X_CLOCK_CONTROL_NAME);
+
+	if (clk) {
+		struct uart_stm32f10x_data *ddata = dev->driver_data;
+		ddata->clock = clk;
+	}
+}
 /**
  * @brief Initialize UART channel
  *
@@ -245,51 +313,30 @@ static int uart_stm32f10x_init(struct device *dev)
 {
 	volatile struct __uart *uart = UART_STRUCT(dev);
 
-	/* TODO: find out which UART port we're using */
+        __uart_stm32f10x_get_clock(dev);
 
-	/* FIXME: hardcoded USART1 */
+        struct uart_stm32f10x_data *data = DEV_DATA(dev);
+	struct uart_stm32f10x_config *cfg = DEV_CFG(dev);
 
 	/* enable clock */
-	volatile struct stm32f10x_rcc *rcc = (struct stm32f10x_rcc*)(RCC_BASE);
-	/* USART1, APB2 clock */
-	rcc->apb2enr |= 1 << 14;
-
-	/* GPIO port A, APB2 clock */
-	rcc->apb2enr |= 1 << 2;
-
-	/* AF, APB2 clock */
-	rcc->apb2enr |= 1 << 0;
+        clock_control_on(data->clock, cfg->clock_subsys);
 
 	/* setup pins */
-	setup_port();
+	setup_port(data);
 
-	/* clear stop bits */
+	/* FIXME: hardcoded, clear stop bits */
 	uart->cr2.bit.stop = 0;
 
 	uart->cr1.val = 0;
-	/* 8n1 */
+	/* FIXME: hardcoded, 8n1 */
 	uart->cr1.bit.m = 0;
 	uart->cr1.bit.pce = 0;
 
-	/* disable hardware flow control */
+	/* FIXME: hardcoded, disable hardware flow control */
 	uart->cr3.bit.ctse = 0;
 	uart->cr3.bit.rtse = 0;
 
-	/* setup 9600 */
-	/* TODO: setup baud rate */
-
-	/* assuming PCLK2 (USART1) is clocked at 36MHz */
-
-	/* baud rate calculation:
-	 *
-	 *     baud rate = f_clk / (16 * usartdiv)
-	 *
-	 * for USART1, f_clk == PCLK2, for 9600, usartdiv = 234.375,
-	 * hence mantissa = 234, fracion = 6 (0.375 * 16)
-	 */
-
-	uart->brr.bit.mantissa = 234;
-	uart->brr.bit.fraction = 6;
+	set_baud_rate(dev, cfg->baud_rate);
 
 	/* enable TX/RX */
 	uart->cr1.bit.te = 1;
@@ -308,15 +355,17 @@ static struct uart_driver_api uart_stm32f10x_driver_api = {
 };
 
 #define UART_ADDR USART1_ADDR
-static struct uart_device_config uart_stm32f10x_dev_cfg_0 = {
-	.base = (uint8_t *)UART_ADDR,
-	.sys_clk_freq = CONFIG_UART_STM32F10X_CLK_FREQ,
+static struct uart_stm32f10x_config uart_stm32f10x_dev_cfg_0 = {
+	.uconf = {
+		.base = (uint8_t *)UART_ADDR,
+		.sys_clk_freq = CONFIG_UART_STM32F10X_CLK_FREQ,
+	},
+	.baud_rate = CONFIG_UART_STM32F10X_BAUD_RATE,
+        .clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART1),
 };
 
-static struct uart_stm32f10x_dev_data uart_stm32f10x_dev_data_0 = {
-	.baud_rate = CONFIG_UART_STM32F10X_BAUD_RATE,
-};
+static struct uart_stm32f10x_data uart_stm32f10x_dev_data_0;
 
 DEVICE_INIT(uart_stm32f10x_0, CONFIG_UART_STM32F10X_NAME, &uart_stm32f10x_init,
-            &uart_stm32f10x_dev_data_0, &uart_stm32f10x_dev_cfg_0,
-            PRIMARY, CONFIG_KERNEL_INIT_PRIORITY_DEVICE);
+	    &uart_stm32f10x_dev_data_0, &uart_stm32f10x_dev_cfg_0,
+	    PRIMARY, CONFIG_KERNEL_INIT_PRIORITY_DEVICE);

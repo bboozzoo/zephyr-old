@@ -44,41 +44,6 @@ static void clock_init(void)
 	rcc->cr.bit.hsion = 1;
 	/* this should end after one test */
 	while (rcc->cr.bit.hsirdy != 1);
-
-	/* aim for 36MHz SYSCLK */
-
-	/* setup PLL first */
-	rcc->cr.bit.pllon = 0;
-
-	/* PLL input from HSI/2 = 4MHz */
-	rcc->cfgr.bit.pllsrc = 0;
-
-	/* setup PLL for x9 multiplication -> 36MHz */
-	rcc->cfgr.bit.pllmul = 0x7;
-
-	/* enable PLL */
-	rcc->cr.bit.pllon = 1;
-
-	/* wait for it to become ready */
-	while (rcc->cr.bit.pllrdy != 1);
-
-	/* setup AHB prescaler to 0, 36MHz on AHB */
-	rcc->cfgr.bit.hpre = 0;
-
-	/* setup APB1, must not exceed 36MHz, prescaler set to 0 */
-	rcc->cfgr.bit.ppre1 = 0x0;
-
-	/* setup APB2 to use 36MHz, prescaler set to 0 */
-	rcc->cfgr.bit.ppre2 = 0x0;
-
-	/* setup SYSCLK source from PLL */
-	rcc->cfgr.bit.sw = 0x2;	/* 0b10 */
-
-	/* wait for SYSCLK to switch to PLL */
-	while (rcc->cfgr.bit.sws != 0x2);
-
-	/* done, we should be running at 36MHz, APB1 at 36MHz, APB2 at
-	 * 36MHz */
 }
 
 /**

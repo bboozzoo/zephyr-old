@@ -153,6 +153,11 @@ int stm32f10x_clock_control_init(struct device *dev)
 	volatile struct stm32f10x_rcc *rcc =
 		(struct stm32f10x_rcc *)(data->base);
 
+	/* enable HSI clock */
+	rcc->cr.bit.hsion = 1;
+	/* this should end after one test */
+	while (rcc->cr.bit.hsirdy != 1);
+
 	/* disable PLL */
 	rcc->cr.bit.pllon = 0;
 

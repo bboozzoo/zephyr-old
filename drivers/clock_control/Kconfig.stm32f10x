@@ -41,7 +41,7 @@ config CLOCK_STM32F10X_AHB_PRESCALER
        int "AHB prescaler"
        depends on CLOCK_CONTROL_STM32F10X
        help
-        AHB prescaler, allowed values: 0, 2, 4, 7, 16, 64, 128,
+        AHB prescaler, allowed values: 0, 2, 4, 8, 16, 64, 128,
         256, 512.
 
 config CLOCK_STM32F10X_APB1_PRESCALER

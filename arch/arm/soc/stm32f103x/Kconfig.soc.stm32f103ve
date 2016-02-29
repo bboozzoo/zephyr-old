@@ -1,3 +1,0 @@
-
-config SOC_STM32F103VE
-       bool "STM32F103VE"

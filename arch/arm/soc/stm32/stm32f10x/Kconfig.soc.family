@@ -1,0 +1,49 @@
+
+choice
+prompt "STM32F1x MCU Selection"
+depends on SOC_STM32F1X
+
+config SOC_STM32F103VE
+       bool "STM32F103VE"
+
+endchoice
+
+if SOC_STM32F1X
+
+source "arch/arm/soc/stm32/stm32f10x/Kconfig.soc.stm32f10*"
+
+
+# config SOC
+#        default stm32f103x
+
+config SRAM_BASE_ADDRESS
+        default 0x20000000
+
+config FLASH_BASE_ADDRESS
+        default 0x08000000
+
+config NUM_IRQ_PRIO_BITS
+        int
+        default 3
+
+config KERNEL_INIT_PRIORITY_DEFAULT
+        default 40
+
+config KERNEL_INIT_PRIORITY_DEVICE
+        default 50
+
+config UART_CONSOLE_PRIORITY
+        default 60
+
+if UART_CONSOLE
+
+config UART_CONSOLE_ON_DEV_NAME
+        default "UART_0"
+config UART_CONSOLE_IRQ
+        default 8
+config UART_CONSOLE_IRQ_PRI
+        default 3
+
+endif # UART_CONSOLE
+
+endif # SOC_STM32F1X

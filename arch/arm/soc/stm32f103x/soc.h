@@ -37,6 +37,7 @@
 /* Reset and Clock Control */
 #define RCC_BASE              (AHBPERIPH_BASE + 0x1000)
 
+#define GPIO_REG_SIZE         0x400
 #define GPIOA_BASE            (APB2PERIPH_BASE + 0x0800)
 #define GPIOB_BASE            (APB2PERIPH_BASE + 0xC000)
 #define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)

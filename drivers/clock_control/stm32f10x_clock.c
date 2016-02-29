@@ -135,16 +135,15 @@ static int __ahb_prescaler(int prescaler) {
  * @brief map PLL multiplier setting to register value
  */
 static int __pllmul(int mul) {
-	const struct regval_map map[] = {
-		{4,	STM32F10X_RCC_CFG_PLL_MUL_4},
-		{5,	STM32F10X_RCC_CFG_PLL_MUL_5},
-		{6,	STM32F10X_RCC_CFG_PLL_MUL_6},
-		{7,	STM32F10X_RCC_CFG_PLL_MUL_7},
-		{8,	STM32F10X_RCC_CFG_PLL_MUL_8},
-		{9,	STM32F10X_RCC_CFG_PLL_MUL_9},
-		{65,	STM32F10X_RCC_CFG_PLL_MUL_6_5},
-	};
-	return map_reg_val(map, sizeof(map)/sizeof(map[0]), mul);
+	/* x2 -> 0x0
+	 * x3 -> 0x1
+	 * x4 -> 0x2
+	 * ...
+	 * x15 -> 0xd
+	 * x16 -> 0xe
+	 * x16 -> 0xf
+	 */
+	return mul - 2;
 }
 
 int stm32f10x_clock_control_init(struct device *dev)

@@ -1,6 +1,6 @@
 config GPIO_STM32F10X
 	bool "GPIO Driver for STM32F10x family of MCUs"
-	depends on GPIO && SOC_STM32F10X
+	depends on GPIO && SOC_STM32F1X
 	default n
 	help
          Enable GPIO driver for STM32F10x line of MCUs

@@ -59,6 +59,10 @@
 #include <misc/util.h>
 #include <drivers/rand32.h>
 
+#include "gpio_registers.h"
+#define STM32PIN(_port, _pin) \
+	(_port << 4 | _pin)
+
 /* uart configuration settings */
 #define UART_IRQ_FLAGS 0
 

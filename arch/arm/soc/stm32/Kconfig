@@ -16,4 +16,7 @@
 # limitations under the License.
 #
 
+config SOC
+       default stm32
+
 source "arch/arm/soc/stm32/*/Kconfig.soc.family*"

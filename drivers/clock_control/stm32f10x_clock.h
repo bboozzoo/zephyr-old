@@ -96,6 +96,7 @@ union __rcc_cfgr {
 		uint32_t pllxtpre :1 __packed;
 		uint32_t pllmul :4 __packed;
 		uint32_t usbpre :1 __packed;
+		uint32_t rsvd__23 :1 __packed;
 		uint32_t mco :3 __packed;
 		uint32_t rsvd__27_31 :5 __packed;
 	} bit;

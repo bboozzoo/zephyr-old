@@ -46,7 +46,7 @@
 
 #define GPIO_REG_SIZE         0x400
 #define GPIOA_BASE            (APB2PERIPH_BASE + 0x0800)
-#define GPIOB_BASE            (APB2PERIPH_BASE + 0xC000)
+#define GPIOB_BASE            (APB2PERIPH_BASE + 0x0C00)
 #define GPIOC_BASE            (APB2PERIPH_BASE + 0x1000)
 #define GPIOD_BASE            (APB2PERIPH_BASE + 0x1400)
 #define GPIOE_BASE            (APB2PERIPH_BASE + 0x1800)

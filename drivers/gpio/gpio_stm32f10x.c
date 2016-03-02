@@ -29,6 +29,8 @@
 struct gpio_stm32f10x_config {
 	/* port base address */
 	uint8_t *base;
+	/* IO port */
+	enum pin_port port;
 };
 
 /**
@@ -41,15 +43,16 @@ static int gpio_stm32f10x_config(struct device *dev, int access_op,
 		return DEV_NO_SUPPORT;
 
 	struct device *pindev = device_get_binding(PINMUX_NAME);
+	struct gpio_stm32f10x_config *cfg = dev->config->config_info;
 
-	int cfg = 0;
+	int pincfg = 0;
 	/* pretend we only support out direction */
 	if ((flags & GPIO_DIR_MASK) == GPIO_DIR_OUT)
-		cfg = PIN_CONFIG_DRIVE_PUSH_PULL;
+		pincfg = PIN_CONFIG_DRIVE_PUSH_PULL;
 	else
 		return DEV_NO_SUPPORT;
 
-	return pinmux_pin_set(pindev, pin, cfg);
+	return pinmux_pin_set(pindev, STM32PIN(cfg->port, pin), pincfg);
 }
 
 /**
@@ -172,9 +175,10 @@ static int gpio_stm32f10x_init(struct device *device)
 	return DEV_OK;
 }
 
-#define GPIO_DEVICE_INIT(__name, __suffix, __base_addr)		 \
+#define GPIO_DEVICE_INIT(__name, __suffix, __base_addr, __port)	       \
 static struct gpio_stm32f10x_config gpio_stm32f10x_cfg_## __suffix = { \
 	.base = (uint8_t *)__base_addr,				      \
+	.port = __port,						      \
 };								      \
 DEVICE_INIT(gpio_stm32f10x_## __suffix,				      \
 	__name,							      \
@@ -185,29 +189,29 @@ DEVICE_INIT(gpio_stm32f10x_## __suffix,				      \
 	CONFIG_KERNEL_INIT_PRIORITY_DEVICE)
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTA
-GPIO_DEVICE_INIT("GPIOA", a, GPIOA_BASE);
+GPIO_DEVICE_INIT("GPIOA", a, GPIOA_BASE, STM32_PORTA);
 #endif /* CONFIG_GPIO_STM32F10X_PORTA */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTB
-GPIO_DEVICE_INIT("GPIOB", b, GPIOB_BASE);
+GPIO_DEVICE_INIT("GPIOB", b, GPIOB_BASE, STM32_PORTB);
 #endif /* CONFIG_GPIO_STM32F10X_PORTB */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTC
-GPIO_DEVICE_INIT("GPIOC", c, GPIOC_BASE);
+GPIO_DEVICE_INIT("GPIOC", c, GPIOC_BASE, STM32_PORTC);
 #endif /* CONFIG_GPIO_STM32F10X_PORTC */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTD
-GPIO_DEVICE_INIT("GPIOD", d, GPIOD_BASE);
+GPIO_DEVICE_INIT("GPIOD", d, GPIOD_BASE, STM32_PORTD);
 #endif /* CONFIG_GPIO_STM32F10X_PORTD */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTE
-GPIO_DEVICE_INIT("GPIOE", e, GPIOE_BASE);
+GPIO_DEVICE_INIT("GPIOE", e, GPIOE_BASE, STM32_PORTE);
 #endif /* CONFIG_GPIO_STM32F10X_PORTE */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTF
-GPIO_DEVICE_INIT("GPIOF", f, GPIOF_BASE);
+GPIO_DEVICE_INIT("GPIOF", f, GPIOF_BASE, STM32_PORTF);
 #endif /* CONFIG_GPIO_STM32F10X_PORTF */
 
 #ifdef CONFIG_GPIO_STM32F10X_PORTG
-GPIO_DEVICE_INIT("GPIOG", g, GPIOG_BASE);
+GPIO_DEVICE_INIT("GPIOG", g, GPIOG_BASE, STM32_PORTG);
 #endif /* CONFIG_GPIO_STM32F10X_PORTG */

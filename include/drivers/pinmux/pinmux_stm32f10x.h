@@ -17,7 +17,7 @@
 #ifndef __PINMUX_STM32F10X_H__
 #define __PINMUX_STM32F10X_H__
 
-enum {
+enum pin_port {
 	STM32_PORTA = 0,
 	STM32_PORTB = 1,
 	STM32_PORTC = 2,

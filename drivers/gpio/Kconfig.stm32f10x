@@ -1,0 +1,43 @@
+config GPIO_STM32F10X
+	bool "GPIO Driver for STM32F10x family of MCUs"
+	depends on GPIO && SOC_STM32F1X
+	default n
+	help
+         Enable GPIO driver for STM32F10x line of MCUs
+
+config GPIO_STM32F10X_PORTA
+	bool "Enable GPIO port A support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTB
+	bool "Enable GPIO port B support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTC
+	bool "Enable GPIO port C support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTD
+	bool "Enable GPIO port D support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTE
+	bool "Enable GPIO port E support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTF
+	bool "Enable GPIO port F support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+config GPIO_STM32F10X_PORTG
+	bool "Enable GPIO port G support"
+	depends on GPIO && GPIO_STM32F10X
+	default n
+
+

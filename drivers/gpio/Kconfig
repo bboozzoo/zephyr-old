@@ -704,5 +704,6 @@ config GPIO_SCH_1_BITS
 	  The total of pins the controller can manage (CPU dependent)
 
 source "drivers/gpio/Kconfig.atmel_sam3"
+source "drivers/gpio/Kconfig.stm32f10x"
 
 endif # GPIO

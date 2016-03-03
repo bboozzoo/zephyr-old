@@ -59,6 +59,27 @@
 #include <misc/util.h>
 #include <drivers/rand32.h>
 
+#include "gpio_registers.h"
+
+/**
+ * @brief numerical IDs for IO ports
+ */
+enum stm32f10x_pin_port {
+	STM32_PORTA = 0,	/* IO port A */
+	STM32_PORTB = 1,	/* .. */
+	STM32_PORTC = 2,
+	STM32_PORTD = 3,
+	STM32_PORTE = 4,
+	STM32_PORTF = 5,
+	STM32_PORTG = 6,	/* IO port G */
+};
+
+/**
+ * @brief helper macro to encode an IO port pin in a numerical format
+ */
+#define STM32PIN(_port, _pin) \
+	(_port << 4 | _pin)
+
 #endif /* !_ASMLANGUAGE */
 
 #endif /* _STM32F1_SOC_H_ */

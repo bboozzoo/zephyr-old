@@ -106,3 +106,5 @@ config PINMUX_GALILEO_GPIO_INTEL_RW_NAME
         help
         The name of the Legacy Bridge Resume Well GPIO with
         GPIO_SUS<0>..GPIO_SUS<5> in the schematic.
+
+source "drivers/pinmux/Kconfig.stm32"

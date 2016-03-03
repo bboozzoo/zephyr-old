@@ -1,0 +1,14 @@
+if SOC_STM32F103VE
+
+config SRAM_SIZE
+       default 64
+
+config FLASH_SIZE
+       default 512
+
+config NUM_IRQS
+        int
+        default 68
+
+endif # SOC_STM32F103VE
+

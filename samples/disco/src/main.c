@@ -26,9 +26,11 @@ void main(void)
 	gpio_pin_configure(gpiob, 5, GPIO_DIR_OUT);
 	gpio_pin_configure(gpiob, 0, GPIO_DIR_OUT);
 
+	int cnt = 0;
 	while (1) {
 		gpio_pin_write(gpiob, 5, cnt % 2);
 		gpio_pin_write(gpiob, 0, (cnt + 1) % 2);
 		task_sleep(SECONDS(1));
+		cnt++;
 	}
 }

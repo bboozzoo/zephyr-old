@@ -705,4 +705,6 @@ config GPIO_SCH_1_BITS
 
 source "drivers/gpio/Kconfig.atmel_sam3"
 
+source "drivers/gpio/Kconfig.stm32"
+
 endif # GPIO

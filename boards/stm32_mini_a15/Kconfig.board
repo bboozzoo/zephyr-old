@@ -1,0 +1,5 @@
+
+config  BOARD_STM32_MINI_A15
+	bool "STM32 MINI A15 Development Board"
+        select SOC_STM32F103VE
+	depends on ARM

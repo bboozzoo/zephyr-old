@@ -25,8 +25,8 @@
  */
 
 
-#ifndef _STM32F103_SOC_H_
-#define _STM32F103_SOC_H_
+#ifndef _STM32F1_SOC_H_
+#define _STM32F1_SOC_H_
 
 /* peripherals start address */
 #define PERIPH_BASE           0x40000000
@@ -68,4 +68,4 @@
 
 #endif /* !_ASMLANGUAGE */
 
-#endif /* _STM32F103_SOC_H_ */
+#endif /* _STM32F1_SOC_H_ */

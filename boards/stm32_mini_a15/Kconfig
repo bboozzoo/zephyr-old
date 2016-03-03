@@ -1,0 +1,7 @@
+
+if BOARD_STM32_MINI_A15
+
+config BOARD
+	default stm32_mini_a15
+
+endif # BOARD_STM32_MINI_A15

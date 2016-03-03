@@ -899,4 +899,6 @@ config GPIO_K64_PORTE_PRI
 
 source "drivers/gpio/Kconfig.atmel_sam3"
 
+source "drivers/gpio/Kconfig.stm32"
+
 endif # GPIO

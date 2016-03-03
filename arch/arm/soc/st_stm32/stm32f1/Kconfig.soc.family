@@ -10,11 +10,11 @@ endchoice
 
 if SOC_STM32F1X
 
-source "arch/arm/soc/stm32/stm32f1x/Kconfig.soc.stm32f1*"
+source "arch/arm/soc/st_stm32/stm32f1/Kconfig.soc.stm32f1*"
 
 
 config SOC
-       default stm32/stm32f1x
+       default st_stm32/stm32f1
 
 config SRAM_BASE_ADDRESS
         default 0x20000000

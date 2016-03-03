@@ -1,7 +1,0 @@
-
-if BOARD_EB_STM32_06
-
-config BOARD
-        default eb_stm32_06
-
-endif # BOARD_EB_STM32_06

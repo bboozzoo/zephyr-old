@@ -1,5 +1,0 @@
-
-config  BOARD_EB_STM32_06
-        bool "EB STM32_06 Development Board"
-        select SOC_STM32F103VE
-	depends on ARM

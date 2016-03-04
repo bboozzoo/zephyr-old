@@ -33,6 +33,7 @@
 #include <drivers/k6x_mpu.h>
 #include <drivers/k6x_pmc.h>
 #include <sections.h>
+#include <cortex_m/nmi.h>
 
 
 /* board's setting for PLL multipler (PRDIV0) */
@@ -40,13 +41,6 @@
 
 /* board's setting for PLL multipler (VDIV0) */
 #define FRDM_K64F_PLL_MULT_48 (48 - 24)
-
-#ifdef CONFIG_RUNTIME_NMI
-extern void _NmiInit(void);
-#define NMI_INIT() _NmiInit()
-#else
-#define NMI_INIT()
-#endif
 
 /*
  * K64F Flash configuration fields

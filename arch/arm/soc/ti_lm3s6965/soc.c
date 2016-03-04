@@ -26,13 +26,8 @@
 #include <device.h>
 #include <init.h>
 #include <soc.h>
+#include <cortex_m/nmi.h>
 
-#ifdef CONFIG_RUNTIME_NMI
-extern void _NmiInit(void);
-#define NMI_INIT() _NmiInit()
-#else
-#define NMI_INIT()
-#endif
 
 /**
  *

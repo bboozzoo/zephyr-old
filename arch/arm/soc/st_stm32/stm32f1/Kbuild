@@ -1,3 +1,4 @@
 obj-y += soc.o
 
 obj-$(CONFIG_IRQ_VECTOR_TABLE_SOC) += irq_vector_table.o
+obj-$(CONFIG_GPIO) += soc_gpio.o

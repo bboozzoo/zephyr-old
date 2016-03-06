@@ -261,5 +261,8 @@ int stm32_pin_configure(int pin, int func);
 /* common pinmux device name for all STM32 chips */
 #define STM32_PINMUX_NAME "stm32-pinmux"
 
+#ifdef CONFIG_SOC_STM32F1X
+#include "pinmux_stm32f1.h"
+#endif
 
 #endif	/* _STM32_PINMUX_H_ */

@@ -23,13 +23,15 @@
 #include <pinmux.h>
 #include <gpio/gpio_stm32.h>
 #include <misc/util.h>
+#include <interrupt_controller/exti_stm32.h>
 
 /**
  * @brief Common GPIO driver for STM32 MCUs. Each SoC must implemet a
  * SoC specific part.
  */
 
-/** * @brief configuration of GPIO device
+/**
+ * @brief configuration of GPIO device
  */
 struct gpio_stm32_config {
 	/* port base address */
@@ -39,6 +41,36 @@ struct gpio_stm32_config {
 	/* clock subsystem */
 	clock_control_subsys_t clock_subsys;
 };
+
+/**
+ * @brief driver data
+ */
+struct gpio_stm32_data {
+	/* user ISR cb */
+	gpio_callback_t cb;
+	/* mask of enabled pins */
+	uint32_t enabled_mask;
+};
+
+/**
+ * @brief EXTI interrupt callback
+ */
+static void gpio_stm32_isr(int line, void *arg)
+{
+	struct device *dev = arg;
+	struct gpio_stm32_data *data = dev->driver_data;
+	int is_enabled;
+
+	if (!data->cb)
+		return;
+
+	is_enabled = data->enabled_mask & (1 << line);
+
+	if (!is_enabled)
+		return;
+
+	data->cb(dev, line);
+}
 
 /**
  * @brief Configure pin or port
@@ -62,7 +94,34 @@ static int gpio_stm32_config(struct device *dev, int access_op,
 		return map_res;
 	}
 
-	return stm32_gpio_configure(cfg->base, pin, pincfg);
+	if (stm32_gpio_configure(cfg->base, pin, pincfg)) {
+		return -EIO;
+	}
+
+	if (flags & GPIO_INT) {
+		struct device *exti = device_get_binding(STM32_EXTI_NAME);
+
+		stm32_exti_set_callback(exti, pin, gpio_stm32_isr, dev);
+
+		stm32_gpio_enable_int(cfg->port, pin);
+
+		if (flags & GPIO_INT_EDGE) {
+			int edge = 0;
+
+			if (flags & GPIO_INT_DOUBLE_EDGE) {
+				edge = STM32_EXTI_TRIG_RISING | STM32_EXTI_TRIG_FALLING;
+			} else if (flags & GPIO_INT_ACTIVE_HIGH) {
+				edge = STM32_EXTI_TRIG_RISING;
+			} else {
+				edge = STM32_EXTI_TRIG_FALLING;
+			}
+			stm32_exti_trigger(exti, pin, edge);
+		}
+
+		stm32_exti_enable(exti, pin);
+	}
+
+	return 0;
 }
 
 /**
@@ -100,30 +159,39 @@ static int gpio_stm32_read(struct device *dev, int access_op,
 static int gpio_stm32_set_callback(struct device *dev,
 				   gpio_callback_t callback)
 {
-	ARG_UNUSED(dev);
-	ARG_UNUSED(callback);
+	struct gpio_stm32_data *data = dev->driver_data;
 
-	return -ENOTSUP;
+	data->cb = callback;
+
+	return 0;
 }
 
 static int gpio_stm32_enable_callback(struct device *dev,
 				      int access_op, uint32_t pin)
 {
-	ARG_UNUSED(dev);
-	ARG_UNUSED(access_op);
-	ARG_UNUSED(pin);
+	struct gpio_stm32_data *data = dev->driver_data;
 
-	return -ENOTSUP;
+	if (access_op != GPIO_ACCESS_BY_PIN) {
+		return -ENOTSUP;
+	}
+
+	data->enabled_mask |= 1 << pin;
+
+	return 0;
 }
 
 static int gpio_stm32_disable_callback(struct device *dev,
 				       int access_op, uint32_t pin)
 {
-	ARG_UNUSED(dev);
-	ARG_UNUSED(access_op);
-	ARG_UNUSED(pin);
+	struct gpio_stm32_data *data = dev->driver_data;
 
-	return -ENOTSUP;
+	if (access_op != GPIO_ACCESS_BY_PIN) {
+		return -ENOTSUP;
+	}
+
+	data->enabled_mask &= ~(1 << pin);
+
+	return 0;
 }
 
 static int gpio_stm32_suspend_port(struct device *dev)
@@ -183,10 +251,11 @@ static struct gpio_stm32_config gpio_stm32_cfg_## __suffix = {		\
 	.port = __port,							\
 	.clock_subsys = UINT_TO_POINTER(__clock),			\
 };									\
+static struct gpio_stm32_data gpio_stm32_data_## __suffix;		\
 DEVICE_INIT(gpio_stm32_## __suffix,					\
 	__name,								\
 	gpio_stm32_init,						\
-	NULL,								\
+	&gpio_stm32_data_## __suffix,					\
 	&gpio_stm32_cfg_## __suffix,					\
 	SECONDARY,							\
 	CONFIG_KERNEL_INIT_PRIORITY_DEVICE)
@@ -195,6 +264,7 @@ DEVICE_INIT(gpio_stm32_## __suffix,					\
 GPIO_DEVICE_INIT("GPIOA", a, GPIOA_BASE, STM32_PORTA,
 #ifdef CONFIG_SOC_STM32F1X
 		STM32F10X_CLOCK_SUBSYS_IOPA
+		| STM32F10X_CLOCK_SUBSYS_AFIO
 #endif
 	);
 #endif /* CONFIG_GPIO_STM32_PORTA */
@@ -203,6 +273,7 @@ GPIO_DEVICE_INIT("GPIOA", a, GPIOA_BASE, STM32_PORTA,
 GPIO_DEVICE_INIT("GPIOB", b, GPIOB_BASE, STM32_PORTB,
 #ifdef CONFIG_SOC_STM32F1X
 		STM32F10X_CLOCK_SUBSYS_IOPB
+		| STM32F10X_CLOCK_SUBSYS_AFIO
 #endif
 	);
 #endif /* CONFIG_GPIO_STM32_PORTB */
@@ -211,6 +282,7 @@ GPIO_DEVICE_INIT("GPIOB", b, GPIOB_BASE, STM32_PORTB,
 GPIO_DEVICE_INIT("GPIOC", c, GPIOC_BASE, STM32_PORTC,
 #ifdef CONFIG_SOC_STM32F1X
 		STM32F10X_CLOCK_SUBSYS_IOPC
+		| STM32F10X_CLOCK_SUBSYS_AFIO
 #endif
 );
 #endif /* CONFIG_GPIO_STM32_PORTC */
@@ -219,6 +291,7 @@ GPIO_DEVICE_INIT("GPIOC", c, GPIOC_BASE, STM32_PORTC,
 GPIO_DEVICE_INIT("GPIOD", d, GPIOD_BASE, STM32_PORTD,
 #ifdef CONFIG_SOC_STM32F1X
 		STM32F10X_CLOCK_SUBSYS_IOPD
+		| STM32F10X_CLOCK_SUBSYS_AFIO
 #endif
 	);
 #endif /* CONFIG_GPIO_STM32_PORTD */
@@ -227,6 +300,7 @@ GPIO_DEVICE_INIT("GPIOD", d, GPIOD_BASE, STM32_PORTD,
 GPIO_DEVICE_INIT("GPIOE", e, GPIOE_BASE, STM32_PORTE
 #ifdef CONFIG_SOC_STM32F1X
 		STM32F10X_CLOCK_SUBSYS_IOPE
+		| STM32F10X_CLOCK_SUBSYS_AFIO
 #endif
 	);
 #endif /* CONFIG_GPIO_STM32_PORTE */

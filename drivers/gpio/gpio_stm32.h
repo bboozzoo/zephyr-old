@@ -58,4 +58,11 @@ int stm32_gpio_set(uint32_t *base, int pin, int value);
  */
 int stm32_gpio_get(uint32_t *base, int pin);
 
+/**
+ * @brief enable interrupt source for GPIO pin
+ * @param port
+ * @param pin
+ */
+int stm32_gpio_enable_int(int port, int pin);
+
 #endif /* _STM32_GPIO_H_ */

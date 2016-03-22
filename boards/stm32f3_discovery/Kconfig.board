@@ -1,4 +1,4 @@
-# Kconfig - ST Microelectronics STM32 MCU line
+# Kconfig - STM32F3 Discovery board configuration
 #
 # Copyright (c) 2016 Open-RnD Sp. z o.o.
 #
@@ -15,19 +15,6 @@
 # limitations under the License.
 #
 
-config SOC_STM32F1X
-	bool "STM32F1x Series MCU"
-	select CPU_CORTEX_M
-	select CPU_CORTEX_M3
-	select SOC_STM32
-	select SYS_POWER_LOW_POWER_STATE_SUPPORTED
-	help
-	 Enable support for STM32F1 MCU series
-
-config SOC_STM32F3X
-	bool "STM32F3x Series MCU"
-	select CPU_CORTEX_M
-	select CPU_CORTEX_M4
-	select SOC_STM32
-	help
-	 Enable support for STM32F3 MCU series
+config  BOARD_STM32F3_DISCOVERY
+	bool "STM32F3 Discovery Development Board"
+	depends on SOC_STM32F303VC

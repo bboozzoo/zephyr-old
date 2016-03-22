@@ -1,4 +1,4 @@
-# Kconfig - ST Microelectronics STM32 MCU line
+# Kconfig - ST Microelectronics STM32F334R8 MCU
 #
 # Copyright (c) 2016 Open-RnD Sp. z o.o.
 #
@@ -15,19 +15,17 @@
 # limitations under the License.
 #
 
-config SOC_STM32F1X
-	bool "STM32F1x Series MCU"
-	select CPU_CORTEX_M
-	select CPU_CORTEX_M3
-	select SOC_STM32
-	select SYS_POWER_LOW_POWER_STATE_SUPPORTED
-	help
-	 Enable support for STM32F1 MCU series
+if SOC_STM32F334R8
 
-config SOC_STM32F3X
-	bool "STM32F3x Series MCU"
-	select CPU_CORTEX_M
-	select CPU_CORTEX_M4
-	select SOC_STM32
-	help
-	 Enable support for STM32F3 MCU series
+config SRAM_SIZE
+       default 12
+
+config FLASH_SIZE
+       default 64
+
+config NUM_IRQS
+        int
+        default 60
+
+endif # SOC_STM32F334R8
+

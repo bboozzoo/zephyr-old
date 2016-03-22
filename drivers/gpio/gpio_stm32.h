@@ -38,6 +38,17 @@ struct stm32_gpio {
 	uint32_t bsrr;
 	uint32_t brr;
 	uint32_t lckr;
+#elif defined(CONFIG_SOC_STM32F3X)
+	uint32_t moder;
+	uint32_t otyper;
+	uint32_t ospeedr;
+	uint32_t pupdr;
+	uint32_t idr;
+	uint32_t odr;
+	uint32_t bsr;
+	uint32_t afrl;
+	uint32_t afrh;
+	uint32_t brr;
 #else
 #error missing definition of GPIO registers for your SoC target
 #endif

@@ -18,30 +18,31 @@
 #include <device.h>
 #include <misc/util.h>
 #include <pinmux/stm32/pinmux_stm32.h>
+#include <gpio/gpio_stm32.h>
 #include <drivers/clock_control/stm32_clock_control.h>
 
 static const stm32_pin_func_t pin_pa9_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32F10X_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
 };
 
 static const stm32_pin_func_t pin_pa10_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
 };
 
 static const stm32_pin_func_t pin_pa2_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA2_USART2_TX - 1] = STM32F10X_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PA2_USART2_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
 };
 
 static const stm32_pin_func_t pin_pa3_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA3_USART2_RX - 1] = STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PA3_USART2_RX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
 };
 
 static const stm32_pin_func_t pin_pb10_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PB10_USART3_TX - 1] = STM32F10X_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PB10_USART3_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
 };
 
 static const stm32_pin_func_t pin_pb11_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PB11_USART3_RX - 1] = STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PB11_USART3_RX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
 };
 
 /**
@@ -62,12 +63,12 @@ int stm32_get_pin_config(int pin, int func)
 	 * listed in alternate functions array
 	 */
 	if (func == STM32_PINMUX_FUNC_GPIO) {
-		return STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
+		return STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
 	}
 
 	/* analog function is another 'known' setting */
 	if (func == STM32_PINMUX_FUNC_ANALOG) {
-		return STM32F10X_PIN_CONFIG_ANALOG;
+		return STM32_PIN_CONFIG_ANALOG;
 	}
 
 	func -= 1;

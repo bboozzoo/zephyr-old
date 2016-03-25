@@ -37,15 +37,15 @@
 static uint32_t __func_to_mode(int func)
 {
 	switch (func) {
-	case STM32F10X_PIN_CONFIG_ANALOG:
-	case STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
-	case STM32F10X_PIN_CONFIG_BIAS_PULL_UP:
-	case STM32F10X_PIN_CONFIG_BIAS_PULL_DOWN:
+	case STM32_PIN_CONFIG_ANALOG:
+	case STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
+	case STM32_PIN_CONFIG_BIAS_PULL_UP:
+	case STM32_PIN_CONFIG_BIAS_PULL_DOWN:
 		return 0;
-	case STM32F10X_PIN_CONFIG_DRIVE_OPEN_DRAIN:
-	case STM32F10X_PIN_CONFIG_DRIVE_PUSH_PULL:
-	case STM32F10X_PIN_CONFIG_AF_PUSH_PULL:
-	case STM32F10X_PIN_CONFIG_AF_OPEN_DRAIN:
+	case STM32_PIN_CONFIG_DRIVE_OPEN_DRAIN:
+	case STM32_PIN_CONFIG_DRIVE_PUSH_PULL:
+	case STM32_PIN_CONFIG_AF_PUSH_PULL:
+	case STM32_PIN_CONFIG_AF_OPEN_DRAIN:
 		return 0x1;
 	}
 	return 0;
@@ -57,20 +57,20 @@ static uint32_t __func_to_mode(int func)
 static uint32_t __func_to_cnf(int func)
 {
 	switch (func) {
-	case STM32F10X_PIN_CONFIG_ANALOG:
+	case STM32_PIN_CONFIG_ANALOG:
 		return 0x0;
-	case STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
+	case STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
 		return 0x1;
-	case STM32F10X_PIN_CONFIG_BIAS_PULL_UP:
-	case STM32F10X_PIN_CONFIG_BIAS_PULL_DOWN:
+	case STM32_PIN_CONFIG_BIAS_PULL_UP:
+	case STM32_PIN_CONFIG_BIAS_PULL_DOWN:
 		return 0x2;
-	case STM32F10X_PIN_CONFIG_DRIVE_PUSH_PULL:
+	case STM32_PIN_CONFIG_DRIVE_PUSH_PULL:
 		return 0x0;
-	case STM32F10X_PIN_CONFIG_DRIVE_OPEN_DRAIN:
+	case STM32_PIN_CONFIG_DRIVE_OPEN_DRAIN:
 		return 0x1;
-	case STM32F10X_PIN_CONFIG_AF_PUSH_PULL:
+	case STM32_PIN_CONFIG_AF_PUSH_PULL:
 		return 0x2;
-	case STM32F10X_PIN_CONFIG_AF_OPEN_DRAIN:
+	case STM32_PIN_CONFIG_AF_OPEN_DRAIN:
 		return 0x3;
 	}
 	return 0;
@@ -85,18 +85,18 @@ int stm32_gpio_flags_to_conf(int flags, int *pincfg)
 	}
 
 	if (direction == GPIO_DIR_OUT) {
-		*pincfg = STM32F10X_PIN_CONFIG_DRIVE_PUSH_PULL;
+		*pincfg = STM32_PIN_CONFIG_DRIVE_PUSH_PULL;
 	} else if (direction == GPIO_DIR_IN) {
 		int pud = flags & GPIO_PUD_MASK;
 
 		/* pull-{up,down} maybe? */
 		if (pud == GPIO_PUD_PULL_UP) {
-			*pincfg = STM32F10X_PIN_CONFIG_BIAS_PULL_UP;
+			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_UP;
 		} else if (pud == GPIO_PUD_PULL_DOWN) {
-			*pincfg = STM32F10X_PIN_CONFIG_BIAS_PULL_DOWN;
+			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_DOWN;
 		} else {
 			/* floating */
-			*pincfg = STM32F10X_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
+			*pincfg = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
 		}
 	} else {
 		return -ENOTSUP;
@@ -139,10 +139,10 @@ int stm32_gpio_configure(uint32_t *base_addr, int pin, int conf)
 	*reg |= (cnf << (crpin * 4 + 2) | mode << (crpin * 4));
 
 	/* input mode - 0x1 */
-	if (conf == STM32F10X_PIN_CONFIG_BIAS_PULL_UP) {
+	if (conf == STM32_PIN_CONFIG_BIAS_PULL_UP) {
 		/* enable pull up */
 		gpio->odr |= 1 << pin;
-	} else if (conf == STM32F10X_PIN_CONFIG_BIAS_PULL_DOWN) {
+	} else if (conf == STM32_PIN_CONFIG_BIAS_PULL_DOWN) {
 		/* or pull down */
 		gpio->odr &= ~(1 << pin);
 	}

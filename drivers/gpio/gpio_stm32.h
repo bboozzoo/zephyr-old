@@ -26,6 +26,30 @@
 #include <pinmux/stm32/pinmux_stm32.h>
 #include <gpio.h>
 
+/* IO pin functions are mostly common across STM32 devices. Notable
+ * exception is STM32F1 as these MCUs do not have registers for
+ * configuration of pin's alternate function. The configuration is
+ * done implicitly by setting specific mode and config in MODE and CNF
+ * registers for particular pin.
+ */
+enum stm32_pin_config_mode {
+	STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE = 0,
+	STM32_PIN_CONFIG_BIAS_PULL_UP,
+	STM32_PIN_CONFIG_BIAS_PULL_DOWN,
+	STM32_PIN_CONFIG_ANALOG,
+	STM32_PIN_CONFIG_DRIVE_OPEN_DRAIN,
+	STM32_PIN_CONFIG_DRIVE_PUSH_PULL,
+#ifdef CONFIG_SOC_STM32F1X
+	/* account for STM32F1 method of pin alternate function
+	 * configuration
+	 */
+	STM32_PIN_CONFIG_AF_PUSH_PULL,
+	STM32_PIN_CONFIG_AF_OPEN_DRAIN,
+#else
+	STM32_PIN_CONFIG_AF,
+#endif
+};
+
 /**
  * @brief configuration of GPIO device
  */

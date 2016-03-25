@@ -26,6 +26,23 @@
 #include <pinmux/stm32/pinmux_stm32.h>
 #include <gpio.h>
 
+/* GPIO registers - each GPIO port controls 16 pins, see respective
+ * user manuals for details
+ */
+struct stm32_gpio {
+#if defined(CONFIG_SOC_STM32F1X)
+	uint32_t crl;
+	uint32_t crh;
+	uint32_t idr;
+	uint32_t odr;
+	uint32_t bsrr;
+	uint32_t brr;
+	uint32_t lckr;
+#else
+#error missing definition of GPIO registers for your SoC target
+#endif
+};
+
 /* IO pin functions are mostly common across STM32 devices. Notable
  * exception is STM32F1 as these MCUs do not have registers for
  * configuration of pin's alternate function. The configuration is
@@ -73,16 +90,6 @@ struct gpio_stm32_data {
 };
 
 /**
- * @brief helper for mapping of GPIO flags to SoC specific config
- *
- * @param flags GPIO encoded flags
- * @param out conf SoC specific pin config
- *
- * @return 0 if flags were mapped to SoC pin config
- */
-int stm32_gpio_flags_to_conf(int flags, int *conf);
-
-/**
  * @brief helper for configuration of GPIO pin
  *
  * @param base_addr GPIO port base address
@@ -90,24 +97,6 @@ int stm32_gpio_flags_to_conf(int flags, int *conf);
  * @param func GPIO mode
  */
 int stm32_gpio_configure(uint32_t *base_addr, int pin, int func);
-
-/**
- * @brief helper for setting of GPIO pin output
- *
- * @param base_addr GPIO port base address
- * @param pin IO pin
- * @param value 1, 0
- */
-int stm32_gpio_set(uint32_t *base, int pin, int value);
-
-/**
- * @brief helper for reading of GPIO pin value
- *
- * @param base_addr GPIO port base address
- * @param pin IO pin
- * @return pin value
- */
-int stm32_gpio_get(uint32_t *base, int pin);
 
 /**
  * @brief enable interrupt source for GPIO pin

@@ -76,39 +76,10 @@ static uint32_t __func_to_cnf(int func)
 	return 0;
 }
 
-int stm32_gpio_flags_to_conf(int flags, int *pincfg)
-{
-	int direction = flags & GPIO_DIR_MASK;
-
-	if (!pincfg) {
-		return -EINVAL;
-	}
-
-	if (direction == GPIO_DIR_OUT) {
-		*pincfg = STM32_PIN_CONFIG_DRIVE_PUSH_PULL;
-	} else if (direction == GPIO_DIR_IN) {
-		int pud = flags & GPIO_PUD_MASK;
-
-		/* pull-{up,down} maybe? */
-		if (pud == GPIO_PUD_PULL_UP) {
-			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_UP;
-		} else if (pud == GPIO_PUD_PULL_DOWN) {
-			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_DOWN;
-		} else {
-			/* floating */
-			*pincfg = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
-		}
-	} else {
-		return -ENOTSUP;
-	}
-
-	return 0;
-}
-
 int stm32_gpio_configure(uint32_t *base_addr, int pin, int conf)
 {
-	volatile struct stm32f10x_gpio *gpio =
-		(struct stm32f10x_gpio *)(base_addr);
+	volatile struct stm32_gpio *gpio =
+		(struct stm32_gpio *)(base_addr);
 	int cnf, mode;
 	int crpin = pin;
 
@@ -148,28 +119,6 @@ int stm32_gpio_configure(uint32_t *base_addr, int pin, int conf)
 	}
 
 	return 0;
-}
-
-int stm32_gpio_set(uint32_t *base, int pin, int value)
-{
-	struct stm32f10x_gpio *gpio = (struct stm32f10x_gpio *)base;
-
-	int pval = 1 << (pin & 0xf);
-
-	if (value) {
-		gpio->odr |= pval;
-	} else {
-		gpio->odr &= ~pval;
-	}
-
-	return 0;
-}
-
-int stm32_gpio_get(uint32_t *base, int pin)
-{
-	struct stm32f10x_gpio *gpio = (struct stm32f10x_gpio *)base;
-
-	return (gpio->idr >> pin) & 0x1;
 }
 
 int stm32_gpio_enable_int(int port, int pin)

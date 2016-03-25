@@ -28,8 +28,8 @@
 #include <interrupt_controller/exti_stm32.h>
 
 /**
- * @brief Common GPIO driver for STM32 MCUs. Each SoC must implement a
- * SoC specific integration glue
+ * @brief Common GPIO driver for STM32 MCUs. SoCs must implement a
+ * SoC specific integration glue.
  */
 
 /**
@@ -52,6 +52,43 @@ static void gpio_stm32_isr(int line, void *arg)
 	}
 
 	data->cb(dev, line);
+}
+
+/**
+ * @brief helper for mapping of GPIO flags to SoC specific config
+ *
+ * @param flags GPIO encoded flags
+ * @param out conf SoC specific pin config
+ *
+ * @return 0 if flags were mapped to SoC pin config
+ */
+int stm32_gpio_flags_to_conf(int flags, int *pincfg)
+{
+	int direction = flags & GPIO_DIR_MASK;
+
+	if (!pincfg) {
+		return -EINVAL;
+	}
+
+	if (direction == GPIO_DIR_OUT) {
+		*pincfg = STM32_PIN_CONFIG_DRIVE_PUSH_PULL;
+	} else if (direction == GPIO_DIR_IN) {
+		int pud = flags & GPIO_PUD_MASK;
+
+		/* pull-{up,down} maybe? */
+		if (pud == GPIO_PUD_PULL_UP) {
+			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_UP;
+		} else if (pud == GPIO_PUD_PULL_DOWN) {
+			*pincfg = STM32_PIN_CONFIG_BIAS_PULL_DOWN;
+		} else {
+			/* floating */
+			*pincfg = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
+		}
+	} else {
+		return -ENOTSUP;
+	}
+
+	return 0;
 }
 
 /**
@@ -115,12 +152,22 @@ static int gpio_stm32_write(struct device *dev, int access_op,
 			    uint32_t pin, uint32_t value)
 {
 	struct gpio_stm32_config *cfg = dev->config->config_info;
+	struct stm32_gpio *gpio = (struct stm32_gpio *)cfg->base;
+	int pval;
 
 	if (access_op != GPIO_ACCESS_BY_PIN) {
 		return -ENOTSUP;
 	}
 
-	return stm32_gpio_set(cfg->base, pin, value);
+	pval = 1 << (pin & 0xf);
+
+	if (value) {
+		gpio->odr |= pval;
+	} else {
+		gpio->odr &= ~pval;
+	}
+
+	return 0;
 }
 
 /**
@@ -130,12 +177,13 @@ static int gpio_stm32_read(struct device *dev, int access_op,
 			   uint32_t pin, uint32_t *value)
 {
 	struct gpio_stm32_config *cfg = dev->config->config_info;
+	struct stm32_gpio *gpio = (struct stm32_gpio *)cfg->base;
 
 	if (access_op != GPIO_ACCESS_BY_PIN) {
 		return -ENOTSUP;
 	}
 
-	*value = stm32_gpio_get(cfg->base, pin);
+	*value = (gpio->idr >> pin) & 0x1;
 
 	return 0;
 }

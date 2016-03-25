@@ -28,17 +28,6 @@
  *            (GPIOs and AFIOs)
  */
 
-/* 9.2 GPIO registers - each GPIO port controls 16 pins */
-struct stm32f10x_gpio {
-	uint32_t crl;
-	uint32_t crh;
-	uint32_t idr;
-	uint32_t odr;
-	uint32_t bsrr;
-	uint32_t brr;
-	uint32_t lckr;
-};
-
 /* 9.4.1 AFIO_EVCR */
 union __afio_evcr {
 	uint32_t val;

@@ -9,3 +9,6 @@ obj-$(CONFIG_GPIO_QMSI) += gpio_qmsi.o
 obj-$(CONFIG_GPIO_ATMEL_SAM3) += gpio_atmel_sam3.o
 obj-$(CONFIG_GPIO_K64) += gpio_k64.o
 obj-$(CONFIG_GPIO_STM32) += gpio_stm32.o
+ifeq ($(CONFIG_SOC_STM32F1X),y)
+obj-$(CONFIG_SOC_STM32F1X) += gpio_stm32f1.o
+endif

@@ -21,28 +21,34 @@
 #include <gpio/gpio_stm32.h>
 #include <drivers/clock_control/stm32_clock_control.h>
 
+/*
+ * Note that STM32F1 is different from other STM32 SoCs with regard to
+ * AF configuration. Since the chip has no separate registers for
+ * selecting alternate function, the choice is done implicitly by
+ * configuring pins in proper I/O mode.
+ */
 static const stm32_pin_func_t pin_pa9_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_AF_PUSH_PULL),
 };
 
 static const stm32_pin_func_t pin_pa10_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PA9_USART1_TX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE),
 };
 
 static const stm32_pin_func_t pin_pa2_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA2_USART2_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PA2_USART2_TX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_AF_PUSH_PULL),
 };
 
 static const stm32_pin_func_t pin_pa3_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PA3_USART2_RX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PA3_USART2_RX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE),
 };
 
 static const stm32_pin_func_t pin_pb10_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PB10_USART3_TX - 1] = STM32_PIN_CONFIG_AF_PUSH_PULL,
+	[STM32F1_PINMUX_FUNC_PB10_USART3_TX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_AF_PUSH_PULL),
 };
 
 static const stm32_pin_func_t pin_pb11_funcs[] = {
-	[STM32F1_PINMUX_FUNC_PB11_USART3_RX - 1] = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE,
+	[STM32F1_PINMUX_FUNC_PB11_USART3_RX - 1] = STM32_AS_MODE(STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE),
 };
 
 /**
@@ -57,18 +63,20 @@ static struct stm32_pinmux_conf pins[] = {
 	STM32_PIN_CONF(STM32_PIN_PB11, pin_pb11_funcs),
 };
 
-int stm32_get_pin_config(int pin, int func)
+int stm32_get_pin_config(int pin, int func, stm32_pin_func_t *soc_func)
 {
 	/* GPIO function is always available, to save space it is not
 	 * listed in alternate functions array
 	 */
 	if (func == STM32_PINMUX_FUNC_GPIO) {
-		return STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
+		*soc_func = STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE;
+		return 0;
 	}
 
 	/* analog function is another 'known' setting */
 	if (func == STM32_PINMUX_FUNC_ANALOG) {
-		return STM32_PIN_CONFIG_ANALOG;
+		*soc_func = STM32_PIN_CONFIG_ANALOG;
+		return 0;
 	}
 
 	func -= 1;
@@ -79,7 +87,7 @@ int stm32_get_pin_config(int pin, int func)
 				return -EINVAL;
 			}
 
-			return pins[i].funcs[func];
+			*soc_func = pins[i].funcs[func];
 		}
 	}
 	return -EINVAL;

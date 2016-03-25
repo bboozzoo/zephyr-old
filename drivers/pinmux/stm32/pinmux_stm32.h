@@ -213,7 +213,50 @@ enum stm32_pin_alt_func {
 #define STM32_PIN_PH14  STM32PIN(STM32_PORTH, 14)
 #define STM32_PIN_PH15  STM32PIN(STM32_PORTH, 15)
 
-typedef int stm32_pin_func_t;
+/**
+ * @brief STM32 STM32PINFUNC() encoded pin function
+ *
+ * Higher 16 bits hold the 'real' SoC specific AF setting. Lower 16
+ * bits, hold pin mode as defined by `enum stm32_pin_config_mode`. The
+ * higher 16 bits are valid only if mode is set to one of the valid AF
+ * modes (STM32_PIN_CONFIG_AF for non STM32F1 SoCs, or
+ * STM32_PIN_CONFIG_AF_PUSH_PULL/STM32_PIN_CONFIG_AF_OPEN_DRAIN for
+ * STM32F1).
+ */
+typedef uint32_t stm32_pin_func_t;
+
+#define STM32AF_SHIFT 16
+/**
+ * @brief helper for encoding alternate function with pin config mode
+ * on stm32_pin_func_t
+ */
+#define STM32_AS_AF(__af)			\
+	(__af << STM32AF_SHIFT)
+
+/**
+ * @brief helper for extracting alternate function from stm32_pin_func_t
+ */
+#define STM32_AF(__pinconf)			\
+	(__pinconf >> STM32AF_SHIFT)
+
+/**
+ * @brief helper for encoding pin mode on stm32_pin_func_t
+ */
+#define STM32_AS_MODE(__mode)			\
+	(__mode)
+
+/**
+ * @brief helper for extracting pin mode encoded on stm32_pin_func_t
+ */
+#define STM32_MODE(__pinconf)				\
+	(__pinconf & ((1 << STM32AF_SHIFT) - 1))
+
+/**
+ * @brief helper for encoding pin mode and alternate function on
+ * stm32_pin_func_t
+ */
+#define STM32PINFUNC(__af, __mode)			\
+	(STM32_AS_AF(__af) | STM32_AS_MODE(__mode))
 
 /**
  * @brief helper to extract IO port number from STM32PIN() encoded
@@ -234,14 +277,15 @@ typedef int stm32_pin_func_t;
  *
  * @param pin   pin ID encoded with STM32PIN()
  * @param func  alternate function ID
+ * @param[out] soc_func  SoC specific pin function
  *
  * Helper function for mapping alternate function for given pin to its
  * configuration. This function must be implemented by SoC integartion
  * code.
  *
- * @return SoC specific pin configuration
+ * @return 0 if mapping could be established, error EINVAL otherwise
  */
-int stm32_get_pin_config(int pin, int func);
+int stm32_get_pin_config(int pin, int func, stm32_pin_func_t *soc_func);
 
 /**
  * @brief helper for mapping IO port to its clock subsystem

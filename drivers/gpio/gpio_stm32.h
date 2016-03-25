@@ -94,9 +94,9 @@ struct gpio_stm32_data {
  *
  * @param base_addr GPIO port base address
  * @param pin IO pin
- * @param func GPIO mode
+ * @param func STM32PINFUNC() encoded pin mode
  */
-int stm32_gpio_configure(uint32_t *base_addr, int pin, int func);
+int stm32_gpio_configure(uint32_t *base_addr, int pin, stm32_pin_func_t func);
 
 /**
  * @brief enable interrupt source for GPIO pin

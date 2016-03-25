@@ -36,7 +36,7 @@
  */
 static uint32_t __func_to_mode(int func)
 {
-	switch (func) {
+	switch (STM32_MODE(func)) {
 	case STM32_PIN_CONFIG_ANALOG:
 	case STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
 	case STM32_PIN_CONFIG_BIAS_PULL_UP:
@@ -56,7 +56,7 @@ static uint32_t __func_to_mode(int func)
  */
 static uint32_t __func_to_cnf(int func)
 {
-	switch (func) {
+	switch (STM32_MODE(func)) {
 	case STM32_PIN_CONFIG_ANALOG:
 		return 0x0;
 	case STM32_PIN_CONFIG_BIAS_HIGH_IMPEDANCE:
@@ -76,7 +76,7 @@ static uint32_t __func_to_cnf(int func)
 	return 0;
 }
 
-int stm32_gpio_configure(uint32_t *base_addr, int pin, int conf)
+int stm32_gpio_configure(uint32_t *base_addr, int pin, stm32_pin_func_t conf)
 {
 	volatile struct stm32_gpio *gpio =
 		(struct stm32_gpio *)(base_addr);

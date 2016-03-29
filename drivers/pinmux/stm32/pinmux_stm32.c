@@ -31,6 +31,34 @@
 #include <pinmux/stm32/pinmux_stm32.h>
 
 /**
+ * @brief helper for mapping IO port to its clock subsystem
+ *
+ * @param port  IO port
+ *
+ * Map given IO @port to corresponding clock subsystem. The returned
+ * clock subsystemd ID must suitable for passing as parameter to
+ * clock_control_on(). Implement this function at the SoC level.
+ *
+ * @return clock subsystem ID
+ */
+static clock_control_subsys_t get_port_clock(int port)
+{
+	const clock_control_subsys_t ports_to_clock[STM32_PORTS_MAX] = {
+		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPA),
+		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPB),
+		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPC),
+		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPD),
+		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPE),
+	};
+
+	if (port > STM32_PORTE) {
+		return NULL;
+	}
+
+	return ports_to_clock[port];
+}
+
+/**
  * @brief enable IO port clock
  *
  * @param port I/O port ID
@@ -40,7 +68,7 @@
  */
 static int enable_port(uint32_t port, struct device *clk)
 {
-	clock_control_subsys_t subsys = stm32_get_port_clock(port);
+	clock_control_subsys_t subsys = get_port_clock(port);
 
 	/* enable port clock */
 	if (!clk) {

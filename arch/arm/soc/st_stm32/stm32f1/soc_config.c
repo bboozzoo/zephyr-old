@@ -19,7 +19,6 @@
 #include <misc/util.h>
 #include <pinmux/stm32/pinmux_stm32.h>
 #include <gpio/gpio_stm32.h>
-#include <drivers/clock_control/stm32_clock_control.h>
 
 /*
  * Note that STM32F1 is different from other STM32 SoCs with regard to
@@ -91,21 +90,4 @@ int stm32_get_pin_config(int pin, int func, stm32_pin_func_t *soc_func)
 		}
 	}
 	return -EINVAL;
-}
-
-clock_control_subsys_t stm32_get_port_clock(int port)
-{
-	const clock_control_subsys_t ports_to_clock[STM32_PORTS_MAX] = {
-		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPA),
-		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPB),
-		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPC),
-		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPD),
-		UINT_TO_POINTER(STM32_CLOCK_SUBSYS_IOPE),
-	};
-
-	if (port > STM32_PORTE) {
-		return NULL;
-	}
-
-	return ports_to_clock[port];
 }

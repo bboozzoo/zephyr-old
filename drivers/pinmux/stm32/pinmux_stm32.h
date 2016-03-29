@@ -288,19 +288,6 @@ typedef uint32_t stm32_pin_func_t;
 int stm32_get_pin_config(int pin, int func, stm32_pin_func_t *soc_func);
 
 /**
- * @brief helper for mapping IO port to its clock subsystem
- *
- * @param port  IO port
- *
- * Map given IO @port to corresponding clock subsystem. The returned
- * clock subsystemd ID must suitable for passing as parameter to
- * clock_control_on(). Implement this function at the SoC level.
- *
- * @return clock subsystem ID
- */
-clock_control_subsys_t stm32_get_port_clock(int port);
-
-/**
  * @brief helper for configuration of IO pin
  *
  * @param pin IO pin, STM32PIN() encoded

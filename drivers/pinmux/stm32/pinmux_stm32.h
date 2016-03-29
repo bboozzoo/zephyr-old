@@ -213,30 +213,7 @@ enum stm32_pin_alt_func {
 #define STM32_PIN_PH14  STM32PIN(STM32_PORTH, 14)
 #define STM32_PIN_PH15  STM32PIN(STM32_PORTH, 15)
 
-/* pretend that array will cover pin functions */
 typedef int stm32_pin_func_t;
-
-/**
- * @brief pinmux config wrapper
- *
- * GPIO function is assumed to be always available, as such it's not listed
- * in @funcs array
- */
-struct stm32_pinmux_conf {
-	uint32_t pin;		 /* pin ID */
-	const stm32_pin_func_t *funcs; /* functions array, indexed with
-					* (stm32_pin_alt_func - 1)
-					*/
-	const size_t nfuncs;	 /* number of alternate functions, not
-				  * counting GPIO
-				  */
-};
-
-/**
- * @brief helper to define pins
- */
-#define STM32_PIN_CONF(__pin, __funcs) \
-	{__pin, __funcs, ARRAY_SIZE(__funcs)}
 
 /**
  * @brief helper to extract IO port number from STM32PIN() encoded

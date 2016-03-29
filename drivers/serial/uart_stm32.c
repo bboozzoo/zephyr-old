@@ -330,9 +330,7 @@ static struct uart_stm32_config uart_stm32_dev_cfg_0 = {
 		.irq_config_func = uart_stm32_irq_config_func_0,
 #endif	/* CONFIG_UART_INTERRUPT_DRIVEN */
 	},
-#ifdef CONFIG_SOC_STM32F1X
-	.clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART1),
-#endif	/* CONFIG_SOC_STM32F1X */
+	.clock_subsys = UINT_TO_POINTER(STM32_CLOCK_SUBSYS_USART1),
 };
 
 static struct uart_stm32_data uart_stm32_dev_data_0 = {
@@ -372,9 +370,7 @@ static struct uart_stm32_config uart_stm32_dev_cfg_1 = {
 		.irq_config_func = uart_stm32_irq_config_func_1,
 #endif	/* CONFIG_UART_INTERRUPT_DRIVEN */
 	},
-#ifdef CONFIG_SOC_STM32F1X
-	.clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART2),
-#endif	/* CONFIG_SOC_STM32F1X */
+	.clock_subsys = UINT_TO_POINTER(STM32_CLOCK_SUBSYS_USART2),
 };
 
 static struct uart_stm32_data uart_stm32_dev_data_1 = {
@@ -414,9 +410,7 @@ static struct uart_stm32_config uart_stm32_dev_cfg_2 = {
 		.irq_config_func = uart_stm32_irq_config_func_2,
 #endif	/* CONFIG_UART_INTERRUPT_DRIVEN */
 	},
-#ifdef CONFIG_SOC_STM32F1X
-	.clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART3),
-#endif	/* CONFIG_SOC_STM32F1X */
+	.clock_subsys = UINT_TO_POINTER(STM32_CLOCK_SUBSYS_USART3),
 };
 
 static struct uart_stm32_data uart_stm32_dev_data_2 = {

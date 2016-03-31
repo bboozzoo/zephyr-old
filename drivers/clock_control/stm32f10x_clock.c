@@ -30,6 +30,7 @@
 #include <clock_control.h>
 #include <misc/util.h>
 #include <clock_control/stm32_clock_control.h>
+#include <flash/embedded_flash_stm32.h>
 
 struct stm32f10x_rcc_data {
 	uint8_t *base;
@@ -204,16 +205,13 @@ static struct clock_control_driver_api stm32f10x_clock_control_api = {
  */
 static inline void __setup_flash(void)
 {
-	volatile struct stm32f10x_flash *flash =
-		(struct stm32f10x_flash *)(FLASH_BASE);
+	struct device *efdev;
 
-	if (CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC <= 24000000) {
-		flash->acr.bit.latency = STM32F10X_FLASH_LATENCY_0;
-	} else if (CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC <= 48000000) {
-		flash->acr.bit.latency = STM32F10X_FLASH_LATENCY_1;
-	} else if (CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC <= 72000000) {
-		flash->acr.bit.latency = STM32F10X_FLASH_LATENCY_2;
-	}
+	efdev = device_get_binding(STM32_FLASH_NAME);
+
+	flash_cmd(efdev, STM32_FLASH_CMD_LATENCY_FOR_CLOCK_SET,
+		CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);
+
 }
 
 int stm32f10x_clock_control_init(struct device *dev)

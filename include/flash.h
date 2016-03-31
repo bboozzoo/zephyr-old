@@ -44,12 +44,14 @@ typedef int (*flash_api_write)(struct device *dev, off_t offset,
 			       const void *data, size_t len);
 typedef int (*flash_api_erase)(struct device *dev, off_t offset, size_t size);
 typedef int (*flash_api_write_protection)(struct device *dev, bool enable);
+typedef int (*flash_api_cmd)(struct device *dev, uint32_t cmd, uint32_t p);
 
 struct flash_driver_api {
 	flash_api_read read;
 	flash_api_write write;
 	flash_api_erase erase;
 	flash_api_write_protection write_protection;
+	flash_api_cmd cmd;
 };
 
 /**
@@ -120,6 +122,22 @@ static inline int flash_write_protection_set(struct device *dev, bool enable)
 	struct flash_driver_api *api = (struct flash_driver_api *)dev->driver_api;
 
 	return api->write_protection(dev, enable);
+}
+
+/**
+ *  @brief  Execute flash device specific command
+ *
+ *  @param  dev             : flash device
+ *  @param  op              : flash specific command code
+ *  @param  p               : comand specific parameter
+ *
+ *  @return  0 on success, negative errno code on fail.
+ */
+static inline int flash_cmd(struct device *dev, uint32_t op, uint32_t p)
+{
+	struct flash_driver_api *api = (struct flash_driver_api *)dev->driver_api;
+
+	return api->cmd(dev, op, p);
 }
 
 #ifdef __cplusplus

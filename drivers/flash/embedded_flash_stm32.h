@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef _STM32F10X_FLASH_REGISTERS_H_
-#define _STM32F10X_FLASH_REGISTERS_H_
+#ifndef _STM32_EMBEDDED_FLASH_H_
+#define _STM32_EMBEDDED_FLASH_H_
+
+#include <flash.h>
 
 /**
  * @brief
@@ -28,9 +30,9 @@
  */
 
 enum {
-	STM32F10X_FLASH_LATENCY_0 = 0x0,
-	STM32F10X_FLASH_LATENCY_1 = 0x1,
-	STM32F10X_FLASH_LATENCY_2 = 0x2,
+	STM32_FLASH_LATENCY_0 = 0x0,
+	STM32_FLASH_LATENCY_1 = 0x1,
+	STM32_FLASH_LATENCY_2 = 0x2,
 };
 
 /* 3.3.3 FLASH_ACR */
@@ -58,4 +60,12 @@ struct stm32f10x_flash {
 	uint32_t wrpr;
 };
 
-#endif	/* _STM32F10X_FLASHREGISTERS_H_ */
+/* list of device commands */
+enum stm32_embedded_flash_cmd {
+	STM32_FLASH_CMD_LATENCY_FOR_CLOCK_SET,
+};
+
+/* device name */
+#define STM32_FLASH_NAME "stm32-ef"
+
+#endif	/* _STM32_EMBEDDED_FLASH_H_ */
